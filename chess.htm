@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Tournament</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #4377d7;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #0e0e0e;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ffffff;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #000000;
+        }
+
+        .selected {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .scheduleColumn {
+            width: 48%;
+            float: left;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .scoreboard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #000000;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #scoreboardTable {
+            width: 100%;
+        }
+
+        #scoreboardTable th, #scoreboardTable td {
+            padding: 4px 4px;
+            text-align: center;
+        }
+
+        #scoreboardTable th {
+            background-color: #000000;
+        }
+
+        #scoreboardTable tr:nth-child(even) {
+            background-color: #000000;
+        }
+
+        #scoreboardTable tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        button {
+            background-color: #e20b0b;
+            color: #ffffff;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #6aff00;
+        }
+
+        button.selected {
+            background-color: #2fc817;
+        }
+
+        button.deselect {
+            background-color: #f48f0c;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Chess Tournament</h1>
+
+<h2>Tournament Schedule</h2>
+
+<div class="scheduleColumn">
+    <table id="scheduleTable1">
+        <tr>
+            <th>Match Number</th>
+            <th>Matchup</th>
+            <th>Winner</th>
+        </tr>
+    </table>
+</div>
+
+<div class="scheduleColumn">
+    <table id="scheduleTable2">
+        <tr>
+            <th>Match Number</th>
+            <th>Matchup</th>
+            <th>Winner</th>
+        </tr>
+    </table>
+</div>
+
+<div class="scoreboard" id="scoreboard">
+    <h2>Scoreboard</h2>
+    <table id="scoreboardTable">
+        <tr>
+            <th>Rank</th>
+            <th>Participant</th>
+            <th>Points</th>
+        </tr>
+    </table>
+</div>
+
+<script>
+    var participants = [
+        { name: "Black Mamba", points: 0 },
+        { name: "Toothpick", points: 0 },
+        { name: "Grizzly", points: 0 },
+        { name: "C Lover", points: 0 }
+    ];
+
+    function updateScores() {
+        participants.forEach(function(participant) {
+            participant.points = 0;
+        });
+
+        var buttons = document.querySelectorAll("button.selected");
+        buttons.forEach(function(button) {
+            var winnerName = button.textContent;
+            var winner = participants.find(function(participant) {
+                return participant.name === winnerName;
+            });
+            if (winner) {
+                winner.points++;
+            }
+        });
+
+        participants.sort((a, b) => b.points - a.points);
+
+        var scoreboardTable = document.getElementById("scoreboardTable");
+        while (scoreboardTable.rows.length > 1) {
+            scoreboardTable.deleteRow(1);
+        }
+
+        participants.forEach(function(participant, index) {
+            var newRow = scoreboardTable.insertRow();
+            var rankCell = newRow.insertCell(0)
+            var nameCell = newRow.insertCell(1);
+            var pointsCell = newRow.insertCell(2);
+            rankCell.textContent = index +1;
+            nameCell.textContent = participant.name;
+            pointsCell.textContent = participant.points;
+        });
+    }
+
+    function toggleWinner(button) {
+        var buttons = button.parentElement.querySelectorAll("button");
+        buttons.forEach(function(btn) {
+            if (btn === button) {
+                btn.classList.add("selected");
+            } else {
+                btn.classList.remove("selected");
+            }
+        });
+        updateScores();
+    }
+
+    var scheduleTable1 = document.getElementById("scheduleTable1");
+    var scheduleTable2 = document.getElementById("scheduleTable2");
+    var matchNumber = 1;
+    for (var i = 0; i < participants.length; i++) {
+        for (var j = i + 1; j < participants.length; j++) {
+            for (var k = 0; k < 50; k++) {
+                var scheduleTable = k < 25 ? scheduleTable1 : scheduleTable2;
+                var newRow = scheduleTable.insertRow();
+                var matchNumberCell = newRow.insertCell(0);
+                var matchupCell = newRow.insertCell(1);
+                var winnerCell = newRow.insertCell(2);
+                matchNumberCell.textContent = matchNumber;
+                matchupCell.textContent = participants[i].name + " vs " + participants[j].name;
+
+                var buttonWinner1 = document.createElement("button");
+                buttonWinner1.textContent = participants[i].name;
+                buttonWinner1.addEventListener("click", function() {
+                    toggleWinner(this);
+                });
+                winnerCell.appendChild(buttonWinner1);
+
+                var buttonWinner2 = document.createElement("button");
+                buttonWinner2.textContent = participants[j].name;
+                buttonWinner2.addEventListener("click", function() {
+                    toggleWinner(this);
+                });
+                winnerCell.appendChild(buttonWinner2);
+
+                var buttonDeselect = document.createElement("button");
+                buttonDeselect.textContent = "Deselect";
+                buttonDeselect.classList.add("deselect");
+                buttonDeselect.addEventListener("click", function() {
+                    deselectWinner();
+                });
+                winnerCell.appendChild(buttonDeselect);
+
+                matchNumber++;
+            }
+        }
+    }
+
+    function deselectWinner() {
+        var buttons = document.querySelectorAll("button.selected");
+        buttons.forEach(function(button) {
+            button.classList.remove("selected");
+        });
+        updateScores();
+    }
+</script>
+
+</body>
+</html>
+
+
